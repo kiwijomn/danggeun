@@ -26,20 +26,15 @@ jobs:
     # 빌드
     - name: Make Directory for deliver
       run : ./gradlew clean build --exclude-task test
-   
-    - name: Dir
-      run: cd build
-      
-    - name: Dir
-      run: ls -l
+    
+    # 디렉토리 생성
+    - name: Make Directory
+      run: mkdir deploy
     
     # 복사
     - name: File Copy
-      run: mkdir deploy && cp build/*.jar 
+      run: cp ./build/libs/*.jar ./deploy/
      
     # 압축
     - name: Make zip file
-      run: zip -r -qq -j danggeun.zip deploy
-      
-    - name: Dir
-      run: ls -l 
+      run: zip -r -qq -j danggeun.zip ./deploy
