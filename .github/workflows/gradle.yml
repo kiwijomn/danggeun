@@ -49,4 +49,9 @@ jobs:
 
     # S3에 빌드된 파일 업로드
     - name: Upload to AWS S3
-      run: aws s3 cp --region ap-northeast-2 danggeun.zip s3://danggeun2/  
+      run: aws s3 cp --region ap-northeast-2 danggeun.zip s3://danggeun2/
+      
+     # 코드디플로이 실행
+     # aws codedeploy
+    - name: Run to AWS Codedeploy
+      run: aws deploy create-deployment --application-name danggeun-deploy --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name danggeun-deploy-group --s3-location bucket=danggeun2,bundleType=zip,key=danggeun.zip
