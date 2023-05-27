@@ -21,12 +21,15 @@ jobs:
       
     # 실행 권한
     - name: Build with Gradle
-      run: chmod +x gradlew
+      run: chmod +x gradlew  
 
     # 빌드
     - name: Make Directory for deliver
       run : ./gradlew clean build --exclude-task test
    
+    - name: Dir
+      run: cd build
+      
     - name: Dir
       run: ls -l
     
