@@ -1,6 +1,7 @@
 package com.umc.danggeun.address;
 
 import com.umc.danggeun.address.model.GetLocation;
+import com.umc.danggeun.address.model.GetRegionRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class AddressDao {
@@ -41,12 +43,19 @@ public class AddressDao {
         );
     }
 
-    public int getAddressId(int userIdx, int regionIdx){
+    public int getAddressIdx(int userIdx, int regionIdx){
         String getAddressIdQuery = "select addressIdx from Address where userIdx = ? and regionIdx = ?";
         return this.jdbcTemplate.queryForObject(getAddressIdQuery,
                 int.class,
                 userIdx, regionIdx
         );
+    }
+
+    public void patchAddressRange(int addressIdx, int range){
+        String patchAddressRangeQuery = "update Address set `range` = ? where addressIdx = ?";
+        Object[] patchAddressRangeParams = new Object[]{range, addressIdx};
+
+        this.jdbcTemplate.update(patchAddressRangeQuery,patchAddressRangeParams);
     }
 
     public void patchAddressIsValid(int addressIdx){
@@ -68,8 +77,8 @@ public class AddressDao {
                 int.class,
                 userIdx, regionIdx
         );
-
     }
+
     public void updateAddressIsDeleted(int addressIdx){
         String updateAddressIsDeletedQuery = "update Address set isDeleted = 'Y', isMain ='N' where addressIdx = ?";
         Object[] updateAddressIsDeletedParams = new Object[]{addressIdx};
@@ -108,5 +117,22 @@ public class AddressDao {
                 (rs, rowNum) -> list.add(rs.getInt("regionIdx")),
                 latitude, longitude, latitude, range);
         return list;
+    }
+
+    public void patchAddressIsMain(int addressIdx){
+        String updateAddressIsMainQuery = "update Address set isDeleted = 'N', isMain = 'Y' where addressIdx = ?";
+        Object[] updateAddressIsMainParams = new Object[]{addressIdx};
+        this.jdbcTemplate.update(updateAddressIsMainQuery, updateAddressIsMainParams);
+    }
+
+    public List<GetRegionRes> getRegionBySearch(String search){
+        String getRegionBySearchQuery = "select city, district, regionName from Region\n" +
+                "where regionName like concat('%'," + search.trim() + ", '%')";
+        return this.jdbcTemplate.query(getRegionBySearchQuery,
+                (rs, rowNum) -> new GetRegionRes(
+                        rs.getString("city"),
+                        rs.getString("district"),
+                        rs.getString("regionName")
+                ));
     }
 }

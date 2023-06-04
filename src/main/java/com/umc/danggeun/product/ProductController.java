@@ -11,15 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 
-import static com.umc.danggeun.config.BaseResponseStatus.GET_EXSIT_KEYWORD;
 import static com.umc.danggeun.config.BaseResponseStatus.INVALID_JWT;
 
 @RequestMapping("/product")
 @RequiredArgsConstructor
 @RestController
 public class ProductController {
-//    final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private final ProductProvider productProvider;
     @Autowired
@@ -53,8 +50,7 @@ public class ProductController {
 
     @ResponseBody
     @GetMapping("")
-    public BaseResponse<List<ProductSelectedRes>> getProudctUseAddress(@RequestParam("regionIdx") int regionIdx, @RequestParam("range") int range){ //, @RequestParam(required = false) String keyword, @RequestParam(required = false, defaultValue = "0") int categoryIdx
-        //토큰 유효기간 파악
+    public BaseResponse<List<ProductSelectedRes>> getProudctUseAddress(@RequestParam("regionIdx") int regionIdx, @RequestParam("range") int range){
         try {
             Date current = new Date(System.currentTimeMillis());
             if(current.after(jwtService.getExp())){
@@ -67,29 +63,10 @@ public class ProductController {
         try{
             int userIdByJwt;
             userIdByJwt = jwtService.getUserIdx();
-//            if(keyword != null){
-//                if(categoryIdx != 0){
-//                    return new BaseResponse<>(GET_EXSIT_KEYWORD);
-//                }
-//                else{
-//                    List<ProductSelectedRes> getProductUseAddressByKeyword = productProvider.getPostUseAddressByKeyword(userIdByJwt, townId, range, keyword);
-//                    return new BaseResponse<>(getPostUseAddressByKeyword);
-//                }
-//            }
-//
-//            else if(categoryId != 0){
-//                List<PostSelectRes> getPostUseAddressByCategory = productProvider.getPostUseAddressByCategory(userIdByJwt, townId, range, categoryId);
-//                return new BaseResponse<>(getPostUseAddressByCategory);
-//            }
-//            else{
                 List<ProductSelectedRes> getProductUseAddress = productProvider.getProductUseAddress(regionIdx, range);
                 return new BaseResponse<>(getProductUseAddress);
-//            }
-
         } catch(BaseException exception){
             return new BaseResponse<>((exception.getStatus()));
         }
-
     }
-
 }

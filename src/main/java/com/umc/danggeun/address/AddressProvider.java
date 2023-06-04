@@ -2,11 +2,13 @@ package com.umc.danggeun.address;
 
 import com.umc.danggeun.address.model.GetLocation;
 import com.umc.danggeun.address.model.GetNearRegionListRes;
+import com.umc.danggeun.address.model.GetRegionRes;
 import com.umc.danggeun.config.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.umc.danggeun.config.BaseResponseStatus.DATABASE_ERROR;
 import static com.umc.danggeun.config.BaseResponseStatus.DATABASE_ERROR2;
@@ -17,11 +19,10 @@ public class AddressProvider {
     private final AddressDao addressDao;
 
     public GetNearRegionListRes getNearRegionList(int regionIdx) throws BaseException {
-        // 1. townId의 lat와 lng를 구한다.
-        // 2. townId가 서울에 속하면 r1, r2, r3,r4 는 각각 1,2,3,4 km의 영역
-        //    서울이 아니면 r1,r2,r3,r4는 각각 2,5,8,10km의 영역
-        // 3. range별 townId List 만들기
-        // 4. getNearTownListRes에 넣고 반환
+        // 1. regionIdx의 latitude와 longitude를 구한다.
+        // 2. r1, r2, r3,r4 는 각각 1,2,3,4 km의 영역
+        // 3. range에 따라 regionIdx List 만들기
+        // 4. getNearRegionListRes에 넣고 반환
         GetLocation getLoc;
 
         ArrayList<Integer> r1;
@@ -42,5 +43,15 @@ public class AddressProvider {
 
         GetNearRegionListRes getNearRegionListRes = new GetNearRegionListRes(r1, r2, r3, r4);
         return getNearRegionListRes;
+    }
+
+    public List<GetRegionRes> getRegionBySearch(String search) throws BaseException {
+        List<GetRegionRes> getRegionRes;
+        try {
+            getRegionRes = addressDao.getRegionBySearch(search);
+            return getRegionRes;
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 }

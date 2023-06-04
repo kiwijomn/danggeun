@@ -7,9 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.util.List;
+
+import static com.umc.danggeun.utils.ValidationRegex.isRegexImage;
 
 @RequiredArgsConstructor
 @Repository
@@ -29,23 +32,22 @@ public class ProductDao {
         return this.jdbcTemplate.queryForObject(lastInsertIdQuery, int.class);
     }
 
-    public int createProductImage(PostProductImgReq postProductImgReq){
-        String createProductImageQuery = "insert into ProductImage (productIdx, imgUrl) VALUES (?, ?)";
-        Object[] createProductImageParams = new Object[]{postProductImgReq.getProductIdx(), postProductImgReq.getImgUrl()};
-        this.jdbcTemplate.update(createProductImageQuery, createProductImageParams);
-        String lastInsertIdQuery = "select last_insert_id()";
-        return this.jdbcTemplate.queryForObject(lastInsertIdQuery, int.class);
+    @Transactional
+    public int[] createProductImage(PostProductImgReq postProductImgReq){
+        int[] insertedImgIdx = new int[postProductImgReq.getImgUrl().length];
+        for (int i = 0; i < postProductImgReq.getImgUrl().length; i++) {
+            if (isRegexImage(postProductImgReq.getImgUrl()[i])) {
+                String createProductImageQuery = "insert into ProductImage (productIdx, imgUrl) VALUES (?, ?)";
+                Object[] createProductImageParams = new Object[]{postProductImgReq.getProductIdx(), postProductImgReq.getImgUrl()[i]};
+                this.jdbcTemplate.update(createProductImageQuery, createProductImageParams);
+                String lastInsertIdQuery = "select last_insert_id()";
+                int insertedId = this.jdbcTemplate.queryForObject(lastInsertIdQuery, int.class);
+                insertedImgIdx[i] += insertedId;
+            }
+        }
+        return insertedImgIdx;
     }
 
-    private int productIdx;
-    private int sellerIdx;
-    private int regionName;
-    private int categoryIdx;
-    private String title;
-    private String content;
-    private int price;
-    private String time;
-    private String status;
     public List<ProductSelectedRes> getProductUseAddress(String selectProductQuery){ //, String interestCategoryQurey
         String getProductUseAddressQuery = "select P.productIdx, P.sellerIdx, R.regionName, P.categoryIdx, P.title, P.content, P.price, case" +
                 "           when TIMESTAMPDIFF(second, P.createdAt, current_timestamp) < 60\n" +
@@ -61,7 +63,7 @@ public class ProductDao {
                 "           when TIMESTAMPDIFF(YEAR, P.createdAt, current_timestamp) >= 1\n" +
                 "               then concat(TIMESTAMPDIFF(YEAR, P.createdAt, current_timestamp), '년 전') # 1년 이상은 년으로 표시\n" +
                 "\n" +
-                "           end as time, P.status from Product P left join (select regionIdx, regionName from Region) as R on P.regionIdx = R.regionIdx where P.regionIdx IN ("+ selectProductQuery +") AND (P.status = 'Y' OR P.status = 'R') ORDER BY P.createdAt DESC;";
+                "           end as time, P.status from Product P left join (select regionIdx, regionName from Region) as R on P.regionIdx = R.regionIdx where P.regionIdx IN ("+ selectProductQuery +") AND (P.status = 'Y' OR P.status = 'R') ORDER BY P.createdAt DESC LIMIT 0, 3;";
         return this.jdbcTemplate.query(getProductUseAddressQuery,
                 (rs, rowNum) -> new ProductSelectedRes(
                         rs.getInt("productIdx"),

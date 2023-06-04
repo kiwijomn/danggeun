@@ -1,28 +1,25 @@
 package com.umc.danggeun.address;
 
+import com.umc.danggeun.address.model.GetRegionRes;
 import com.umc.danggeun.address.model.PostAddressReq;
 import com.umc.danggeun.config.BaseException;
 import com.umc.danggeun.config.BaseResponse;
 import com.umc.danggeun.utils.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.List;
 
-import static com.umc.danggeun.config.BaseResponseStatus.GET_TOWN_EXIST_ERROR;
-import static com.umc.danggeun.config.BaseResponseStatus.INVALID_JWT;
+import static com.umc.danggeun.config.BaseResponseStatus.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/address")
 public class AddressController {
-//    final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-//    @Autowired
-//    private final AddressProvider addressProvider;
+    @Autowired
+    private final AddressProvider addressProvider;
     @Autowired
     private final AddressService addressService;
     @Autowired
@@ -30,7 +27,7 @@ public class AddressController {
 
     /**
      * 내 동네 추가
-     * [POST] /address/:townId
+     * POST /address/{regionIdx}
      * @return BaseResponse<String>
      */
     @ResponseBody
@@ -75,7 +72,6 @@ public class AddressController {
     @DeleteMapping("/{regionIdx}")
     public BaseResponse<String> DeleteAddress(@PathVariable("regionIdx") int regionIdx){
 
-        //토큰 유효기간 파악
         try {
             Date current = new Date(System.currentTimeMillis());
             if(current.after(jwtService.getExp())){
@@ -98,76 +94,93 @@ public class AddressController {
             return new BaseResponse<>(exception.getStatus());
         }
     }
-//
-//    /**
-//     * 내 동네 바꾸기
-//     * [Patch] /address/change/:townId
-//     * @return BaseResponse<String>
-//     */
-//
-//    @ResponseBody
-//    @PatchMapping("/change/{townId}")
-//    public BaseResponse<String> PostChangeAddress(@PathVariable("townId") int townId){
-//
-//        if(townId < 1 || townId >6561 ){
-//            return new BaseResponse<>(GET_TOWN_EXIST_ERROR);
-//        }
-//
-//        //토큰 유효기간 파악
-//        try {
-//            Date current = new Date(System.currentTimeMillis());
-//            if(current.after(jwtService.getExp())){
-//                throw new BaseException(INVALID_JWT);
-//            }
-//        }catch (BaseException exception) {
-//            return new BaseResponse<>(exception.getStatus());
-//        }
-//
-//        int userIdByJwt;
-//        try {
-//            userIdByJwt = jwtService.getUserId();
-//
-//
-//            addressService.patchChangeAddress(userIdByJwt, townId);
-//
-//
-//            String result = "동네가 변경되었습니다.";
-//            return new BaseResponse<>(result);
-//        } catch (BaseException exception){
-//            return new BaseResponse<>(exception.getStatus());
-//        }
-//    }
-//
-//
-//
-//    /**
-//     * 유저가 설정한 townId, 인증여부, 범위 가져오기
-//     * [GET] /address
-//     * @return BaseResponse<GetAddressRes>
-//     */
-//    @ResponseBody
-//    @GetMapping("/info")
-//    public BaseResponse<GetAddressRes> getAddress() throws BaseException {
-//
-//        //토큰 유효기간 파악
-//        try {
-//            Date current = new Date(System.currentTimeMillis());
-//            if(current.after(jwtService.getExp())){
-//                throw new BaseException(INVALID_JWT);
-//            }
-//        }catch (BaseException exception) {
-//            return new BaseResponse<>(exception.getStatus());
-//        }
-//
-//        int userIdByJwt;
-//        try {
-//            userIdByJwt = jwtService.getUserId();
-//
-//            GetAddressRes getAddressRes = addressProvider.getAddress(userIdByJwt);
-//
-//            return new BaseResponse<>(getAddressRes);
-//        } catch (BaseException exception){
-//            return new BaseResponse<>(exception.getStatus());
-//        }
-//    }
+
+    /**
+     * 대표 동네 바꾸기
+     * @return BaseResponse<String>
+     */
+
+    @ResponseBody
+    @PutMapping("/change/{regionIdx}")
+    public BaseResponse<String> PutChangeAddress(@PathVariable("regionIdx") int regionIdx){
+
+        if(regionIdx < 805){
+            return new BaseResponse<>(GET_TOWN_EXIST_ERROR);
+        }
+
+        try {
+            Date current = new Date(System.currentTimeMillis());
+            if(current.after(jwtService.getExp())){
+                throw new BaseException(INVALID_JWT);
+            }
+        }catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
+
+        int userIdByJwt;
+        try {
+            userIdByJwt = jwtService.getUserIdx();
+
+            addressService.changeAddress(userIdByJwt, regionIdx);
+
+            String result = "동네가 변경되었습니다.";
+            return new BaseResponse<>(result);
+        } catch (BaseException exception){
+            return new BaseResponse<>(exception.getStatus());
+        }
+    }
+
+    /**
+     * 동네 설정 범위 변경
+     * [Patch] /address/{regionIdx}/{range}
+     * @return BaseResponse<String>
+     */
+    @ResponseBody
+    @PatchMapping("/{regionIdx}/{range}")
+    public BaseResponse<String> PostChangeAddressRange(@PathVariable("regionIdx") int regionIdx, @PathVariable("range") int range){
+
+        if(regionIdx < 1 || regionIdx > 804 ){
+            return new BaseResponse<>(GET_TOWN_EXIST_ERROR);
+        }
+        if( range < 0 || range > 3){
+            return new BaseResponse<>(PATCH_RANGE_RANGE_ERROR);
+        }
+
+        // 토큰 유효기간 파악
+        try {
+            Date current = new Date(System.currentTimeMillis());
+            if(current.after(jwtService.getExp())){
+                throw new BaseException(INVALID_JWT);
+            }
+        }catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
+
+        int userIdByJwt;
+        try {
+            userIdByJwt = jwtService.getUserIdx();
+            addressService.patchAddressRange(userIdByJwt, regionIdx, range);
+
+            String result = "범위가 변경되었습니다.";
+            return new BaseResponse<>(result);
+        } catch (BaseException exception){
+            return new BaseResponse<>(exception.getStatus());
+        }
+    }
+
+    /**
+     * 검색을 통해 동네 조회
+     * [GET] /address?search={search}
+     * @return BaseResponse<List<GetRegionRes>>
+     */
+    @ResponseBody
+    @GetMapping("")
+    public BaseResponse<List<GetRegionRes>> getTownSearchBySearch(@RequestParam("search") String search) {
+        try{
+            List<GetRegionRes> getRegionRes = addressProvider.getRegionBySearch(search);
+            return new BaseResponse<>(getRegionRes);
+        } catch(BaseException exception){
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
 }

@@ -80,12 +80,12 @@ public class UserDao {
     }
 
     public GetUserRes getUser(int userIdx){
-        String getUserQuery = "select nickname, image from User where userIdx = ? ";
+        String getUserQuery = "select nickname, profileImg from User where userIdx = ? ";
         return this.jdbcTemplate.queryForObject(getUserQuery,
                 (rs, rowNum) -> new GetUserRes(
                         userIdx,
-                        rs.getString("image"),
-                        rs.getString("nickname")
+                        rs.getString("nickname"),
+                        rs.getString("profileImg")
                 ),
                 userIdx);
     }

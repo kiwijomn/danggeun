@@ -49,7 +49,7 @@ public class AddressService {
             // 2. 이미 저장되어있던 동네라면
             if (addressDao.getIsExistAddress(userIdx, regionIdx) == 1) { // 이미 등록한 적이 있던 동네라면
                 //3-1. addressId 가져오기
-                int addressIdx = addressDao.getAddressId(userIdx, regionIdx); // addressIdx를 가져와서
+                int addressIdx = addressDao.getAddressIdx(userIdx, regionIdx); // addressIdx를 가져와서
                 addressDao.patchAddressIsValid(addressIdx); // 해당 튜플의 isDeleted를 N으로, isMain을 Y로 바꾸기
             }
             // 4. 저장되어있지 않은 동네라면
@@ -74,7 +74,7 @@ public class AddressService {
 
         //2. status = Invalid, mainTown =Invalid 로 수정
         try{
-            int addressIdx = addressDao.getAddressId(userIdx, regionIdx); // addressIdx 추출
+            int addressIdx = addressDao.getAddressIdx(userIdx, regionIdx); // addressIdx 추출
 
             //3-2. addressId에 해당하는 status Invalid, mainTown = Invalid로 바꾸기
             addressDao.updateAddressIsDeleted(addressIdx); // 해당 튜플의 isDeleted 필드를 Y로, isMain 필드를 N으로 update
@@ -89,6 +89,52 @@ public class AddressService {
                 int addressIdx = addressDao.getExistAddressIdx(userIdx);
                 addressDao.patchAddressIsValid(addressIdx);
             }
+        }catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // main 동네 변경
+    public void changeAddress(int userIdx, int regionIdx) throws BaseException{
+        // 1. 현재 유저가 선택한 동네가 2개인지 확인
+        // 2. 현재 유저가 townId를 선택하고 있는지 확인
+        // 3. 현재 선택한 동네의 mainTown = Invalid 로 변경
+        // 4. townId가 해당되는 adrress 행의 mainTown = Valid 로 변경
+
+        // 현재 유저가 선택한 동네의 개수
+        int validRegionNum = addressDao.countUserAddress(userIdx);
+        if (validRegionNum != 2) { // 2개이면 change x
+            throw new BaseException(POST_ADDRESS_CHANGE_ERROR);
+        }
+
+        // region을 선택했는지 확인
+        if (addressDao.isSelectedRegion(userIdx, regionIdx) == 0) {
+            throw new BaseException(POST_ADDRESS_EXIST_ERROR);
+        }
+
+        try{
+            // 현재 선택한 동네의 isMain을 N으로
+            addressDao.patchMainTown(userIdx);
+
+            // addressIdx에 해당하는 isMain을 Y로 설정
+            int addressIdx = addressDao.getAddressIdx(userIdx, regionIdx);
+            addressDao.patchAddressIsMain(addressIdx);
+        }catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    public void patchAddressRange(int userIdx, int regionIdx, int range) throws BaseException {
+        // 1. 현재 유저가 regionIdx를 선택하고 있는지 확인
+        // 2. addressIdx 찾기
+        // 3. addressIdx의 range 변경
+
+        if (addressDao.isSelectedRegion(userIdx, regionIdx) == 0) {
+            throw new BaseException(POST_ADDRESS_EXIST_ERROR);
+        }
+        try {
+            int addressIdx = addressDao.getAddressIdx(userIdx, regionIdx);
+            addressDao.patchAddressRange(addressIdx, range);
         }catch (Exception exception) {
             throw new BaseException(DATABASE_ERROR);
         }

@@ -9,6 +9,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GetUserRes {
     private int userIdx;
-    private String image;
+    private String profileImg;
     private String nickname;
 }

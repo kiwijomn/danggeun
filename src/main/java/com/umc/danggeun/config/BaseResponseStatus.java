@@ -28,12 +28,10 @@ public enum BaseResponseStatus {
     POST_USERS_EMPTY_NICKNAME(false, 2013, "별명을 입력해주세요."),
     POST_USERS_DUPLICATE_PHONENUMBER(false, 2014, "이미 등록된 전화번호입니다."),
 
-
     // [POST] /users
     POST_USERS_EMPTY_EMAIL(false, 2015, "이메일을 입력해주세요."),
     POST_USERS_INVALID_EMAIL(false, 2016, "이메일 형식을 확인해주세요."),
     POST_USERS_EXISTS_EMAIL(false,2017,"중복된 이메일입니다."),
-
 
     // [POST] /users/logIn
     POST_USERS_EMPTY_PHONE(false, 2018, "휴대폰번호를 입력해주세요."),
@@ -93,7 +91,6 @@ public enum BaseResponseStatus {
     FAILED_TO_LOGIN(false,3014,"없는 아이디거나 비밀번호가 틀렸습니다."),
 
 
-
     /**
      * 4000 : Database, Server 오류
      */
@@ -103,14 +100,7 @@ public enum BaseResponseStatus {
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
 
     //[PATCH] /users/{userIdx}
-    MODIFY_FAIL_USERNAME(false,4014,"유저네임 수정 실패"),
-
-    PASSWORD_ENCRYPTION_ERROR(false, 4011, "비밀번호 암호화에 실패하였습니다."),
-    PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다.");
-
-
-    // 5000 : 필요시 만들어서 쓰세요
-    // 6000 : 필요시 만들어서 쓰세요
+    MODIFY_FAIL_USERNAME(false,4014,"유저네임 수정 실패");
 
 
     private final boolean isSuccess;

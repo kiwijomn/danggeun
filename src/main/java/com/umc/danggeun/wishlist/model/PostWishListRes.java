@@ -1,4 +1,4 @@
-package com.umc.danggeun.product.model;
+package com.umc.danggeun.wishlist.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class PostProductImgRes {
-    private int[] imgIdx;
+public class PostWishListRes {
+    private int wishIdx;
 }

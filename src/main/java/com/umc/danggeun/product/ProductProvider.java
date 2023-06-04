@@ -53,7 +53,7 @@ public class ProductProvider {
                 }
             }
 
-            List<ProductSelectedRes> getProductUseAddress = productDao.getProductUseAddress(selectProductQuery); //, interestCategoryQurey
+            List<ProductSelectedRes> getProductUseAddress = productDao.getProductUseAddress(selectProductQuery); // interestCategoryQurey
             return getProductUseAddress;
         } catch (Exception exception){
             throw new BaseException(DATABASE_ERROR3);
