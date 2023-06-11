@@ -135,4 +135,43 @@ public class AddressDao {
                         rs.getString("regionName")
                 ));
     }
+
+    public List<GetRegionRes> getNearRegionOrderByName(BigDecimal latitude, BigDecimal longitude){
+        String getNearTownOrderByName =
+                "select regionIdx, city, district, regionName \n" +
+                        "from Region\n" +
+                        "group by city, district, regionName, latitude, longitude\n" +
+                        "order by (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) +\n" +
+                        "                      sin(radians(?)) * sin(radians(latitude))))\n" +
+                        "limit 50";
+
+        return this.jdbcTemplate.query(getNearTownOrderByName,
+                (rs, rowNum) -> new GetRegionRes(
+                        rs.getString("city"),
+                        rs.getString("district"),
+                        rs.getString("regionName")
+                ),
+                latitude, longitude, latitude);
+    }
+
+    public int isSelectedAddress(int userIdx, int regionIdx) {
+        String getIsSelectedAddressQuery = "select exists(select addressIdx from Address where userIdx = ? and regionIdx = ? and isMain = 'Y')";
+        return this.jdbcTemplate.queryForObject(getIsSelectedAddressQuery,
+                int.class,
+                userIdx, regionIdx
+        );
+    }
+
+    public void patchAddressIsAuth(int addressIdx){
+        String patchAddressIsAuthQuery = "update Address set isAuth = 'Y' where addressIdx = ? ";
+        Object[] patchAddressIsAuthParams = new Object[]{addressIdx};
+
+        this.jdbcTemplate.update(patchAddressIsAuthQuery, patchAddressIsAuthParams);
+
+        // update 시간 바꾸기
+        String patchIsAuthUpdatedQuery = "update Address set isAuthUpdated = CURRENT_TIMESTAMP where addressIdx = ? ";
+        Object[] patchIsAuthUpdatedParams = new Object[]{addressIdx};
+
+        this.jdbcTemplate.update(patchIsAuthUpdatedQuery, patchIsAuthUpdatedParams);
+    }
 }

@@ -1,5 +1,6 @@
 package com.umc.danggeun.address;
 
+import com.umc.danggeun.address.model.GetNearRegionListRes;
 import com.umc.danggeun.address.model.GetRegionRes;
 import com.umc.danggeun.address.model.PostAddressReq;
 import com.umc.danggeun.config.BaseException;
@@ -181,6 +182,71 @@ public class AddressController {
             return new BaseResponse<>(getRegionRes);
         } catch(BaseException exception){
             return new BaseResponse<>((exception.getStatus()));
+        }
+    }
+
+    // 현재 위치를 통해 주변 동네 조회
+    @ResponseBody
+    @GetMapping("/location")
+    public BaseResponse<List<GetRegionRes>> getTownSearchByLocation(@RequestParam("regionIdx") int regionIdx) {
+        if(regionIdx < 1 || regionIdx > 805 ){
+            return new BaseResponse<>(GET_TOWN_EXIST_ERROR);
+        }
+
+        try{
+            List<GetRegionRes> getTownRes = addressProvider.getRegionByLocation(regionIdx);
+            return new BaseResponse<>(getTownRes);
+        } catch(BaseException exception){
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
+
+    // 특정 동네의 range 별 근처 동네 리스트 반환
+    @ResponseBody
+    @GetMapping("/near")
+    public BaseResponse<GetNearRegionListRes> getNearTownLiST(@RequestParam("regionIdx") int regionIdx) throws BaseException {
+
+        if(regionIdx < 1 || regionIdx > 805){
+            return new BaseResponse<>(GET_TOWN_EXIST_ERROR);
+        }
+
+        try{
+            GetNearRegionListRes getNearTownListRes  = addressProvider.getNearRegionList(regionIdx);
+            return new BaseResponse<>(getNearTownListRes);
+        } catch(BaseException exception){
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
+
+    // 동네 인증 추가하기
+    @ResponseBody
+    @PatchMapping("/auth/{regionIdx}")
+    public BaseResponse<String> PatchCertificationAddress(@PathVariable("regionIdx") int regionIdx){
+
+        if(regionIdx < 1 || regionIdx > 805){
+            return new BaseResponse<>(GET_TOWN_EXIST_ERROR);
+        }
+
+        // 토큰 유효기간 파악
+        try {
+            Date current = new Date(System.currentTimeMillis());
+            if(current.after(jwtService.getExp())){
+                throw new BaseException(INVALID_JWT);
+            }
+        } catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
+
+        int userIdxByJwt;
+
+        try {
+            userIdxByJwt = jwtService.getUserIdx();
+
+            addressService.patchCertificationAddress(userIdxByJwt, regionIdx);
+            String result = "동네가 인증되었습니다.";
+            return new BaseResponse<>(result);
+        } catch (BaseException exception){
+            return new BaseResponse<>(exception.getStatus());
         }
     }
 }

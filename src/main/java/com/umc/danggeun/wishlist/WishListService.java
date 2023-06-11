@@ -29,7 +29,7 @@ public class WishListService {
         // 찜 등록 가능한 상품인지 확인
         int checkProductIdx = wishListDao.checkProductIdx(postWishListReq.getProductIdx());
         if(checkProductIdx == 0){
-            throw new BaseException(POST_POST_INVALID_POST);
+            throw new BaseException(POST_POST_INVALID_PRODUCT);
         }
 
         try{

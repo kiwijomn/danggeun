@@ -44,7 +44,7 @@ public enum BaseResponseStatus {
     POST_POST_INVALID_USER(false, 2023, "조회할 수 없는 유저입니다."),
 
     //[POST] /post/title-image
-    POST_POST_INVALID_POST(false, 2024, "조회할 수 없는 게시물 입니다."),
+    POST_POST_INVALID_PRODUCT(false, 2024, "조회할 수 없는 게시물 입니다."),
 
 
     //[POST] /wish-list/status/

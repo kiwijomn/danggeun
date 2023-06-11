@@ -139,4 +139,26 @@ public class AddressService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
+
+    public void patchCertificationAddress(int userIdx, int regionIdx) throws BaseException {
+        //1. 현재 유저가 townId를 선택하고 있는지 확인
+        //2. addressId 찾기
+        //3. addressId의 certification Valid로 변경
+
+        // 현재 유저가 설정해둔 동네인지 확인
+        if (addressDao.isSelectedAddress(userIdx, regionIdx) == 0) {
+            throw new BaseException(PATCH_SELECTED_ADDRESS_ERROR);
+        }
+
+        try {
+            // addressIdx 찾기
+            int addressIdx = addressDao.getAddressIdx(userIdx, regionIdx);
+
+            // isAuth를 Y로 update
+            addressDao.patchAddressIsAuth(addressIdx);
+
+        } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 }
