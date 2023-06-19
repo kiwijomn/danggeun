@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.umc.danggeun.config.BaseResponseStatus.INVALID_JWT;
+import static com.umc.danggeun.config.BaseResponseStatus.PATCH_WISHLIST_INVALID_STATUS;
 
 @RequestMapping("/product")
 @RequiredArgsConstructor
@@ -66,6 +67,104 @@ public class ProductController {
                 List<ProductSelectedRes> getProductUseAddress = productProvider.getProductUseAddress(regionIdx, range);
                 return new BaseResponse<>(getProductUseAddress);
         } catch(BaseException exception){
+            return new BaseResponse<>((exception.getStatus()));
+        }
+    }
+
+    @ResponseBody
+    @PatchMapping("/{productIdx}/complete/{buyerIdx}")
+    public BaseResponse<String> patchPostComplete(@PathVariable("productIdx") int productIdx, @PathVariable("buyerIdx") int buyerIdx) {
+        //토큰 유효기간 파악
+        try {
+            Date current = new Date(System.currentTimeMillis());
+
+            if(current.after(jwtService.getExp())){
+                throw new BaseException(INVALID_JWT);
+            }
+            int userIdx = jwtService.getUserIdx();
+            productService.patchProductComplete(productIdx, userIdx, buyerIdx);
+
+            String result = "";
+            return new BaseResponse<>(result);
+        }catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
+    }
+
+    @ResponseBody
+    @PatchMapping("/{productIdx}/sale")
+    public BaseResponse<String> patchPostSale(@PathVariable("productIdx") int productIdx) {
+        //토큰 유효기간 파악
+        try {
+            Date current = new Date(System.currentTimeMillis());
+            if(current.after(jwtService.getExp())){
+                throw new BaseException(INVALID_JWT);
+            }
+            int userIdx = jwtService.getUserIdx();
+            productService.patchProductSale(productIdx, userIdx);
+
+            String result = "";
+            return new BaseResponse<>(result);
+        }catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
+
+    }
+
+    @ResponseBody
+    @PatchMapping("/{productIdx}/reserved/{reservationIdx}")
+    public BaseResponse<String> patchPostReserved(@PathVariable("productIdx") int productIdx, @PathVariable("reservationIdx") int reservationIdx) {
+        //토큰 유효기간 파악
+        try {
+            Date current = new Date(System.currentTimeMillis());
+            if(current.after(jwtService.getExp())){
+                throw new BaseException(INVALID_JWT);
+            }
+            int userIdx = jwtService.getUserIdx();
+            productService.patchProductReserved(productIdx, userIdx, reservationIdx);
+
+            String result = "";
+            return new BaseResponse<>(result);
+        }catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
+    }
+
+    @ResponseBody
+    @PatchMapping("/image/{productIdx}/status")
+    public BaseResponse<String> modifyPostImageStatus(@PathVariable("productIdx") int productIdx, @RequestParam(required = false, defaultValue = "-1") int imgIdx, @RequestBody Product product){
+        //토큰 유효기간 파악
+        try {
+            Date current = new Date(System.currentTimeMillis());
+            if(current.after(jwtService.getExp())){
+                throw new BaseException(INVALID_JWT);
+            }
+        }catch (BaseException exception) {
+            return new BaseResponse<>(exception.getStatus());
+        }
+
+        try {
+            //jwt에서 idx 추출.
+            int userIdx = jwtService.getUserIdx();
+
+            if(product.getStatus().equals("Invalid")){
+                if(imgIdx != -1){
+                    PatchProductStatus patchProductStatus = new PatchProductStatus(userIdx, productIdx, imgIdx, product.getStatus());
+                    productService.modifyOnePostImageStatus(patchProductStatus);
+                }
+                else{
+                    PatchProductStatus patchProductStatus = new PatchProductStatus(userIdx, productIdx, imgIdx, product.getStatus());
+                    productService.modifyPostImageStatus(patchProductStatus);
+                }
+
+                String result = "";
+                return new BaseResponse<>(result);
+            }
+            else{
+                return new BaseResponse<>(PATCH_WISHLIST_INVALID_STATUS);
+            }
+
+        } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
         }
     }

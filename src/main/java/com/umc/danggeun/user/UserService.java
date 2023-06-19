@@ -1,16 +1,18 @@
 package com.umc.danggeun.user;
 
 import com.umc.danggeun.config.BaseException;
+import com.umc.danggeun.config.BaseResponse;
 import com.umc.danggeun.user.model.PatchUserProfileReq;
 import com.umc.danggeun.user.model.PostUserReq;
 import com.umc.danggeun.user.model.PostUserRes;
 import com.umc.danggeun.utils.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.transaction.Transactional;
-import java.util.Random;
+import java.util.Date;
 
 import static com.umc.danggeun.config.BaseResponseStatus.*;
 
@@ -21,7 +23,7 @@ public class UserService {
     private final UserProvider userProvider;
     private final JwtService jwtService;
 
-    //POST
+    // POST
     public PostUserRes createUser(PostUserReq postUserReq) throws BaseException {
         // 이미 등록된 번호인지 확인
         if(userDao.checkPhoneNumber(postUserReq.getPhone()) == 1){
@@ -64,7 +66,7 @@ public class UserService {
                 throw new BaseException(NICKNAME_UPDATED_ERROR) ;
             }
             userDao.patchUserProfile(userIdx, patchUserProfileReq); // 유저 정보 수정
-        }else{ // 닉네임 수정 안 할 경우
+        }else { // 닉네임 수정 안 할 경우
             userDao.patchUserProfileImage(userIdx, patchUserProfileReq.getProfileImg()); // 유저 정보 수정
         }
     }

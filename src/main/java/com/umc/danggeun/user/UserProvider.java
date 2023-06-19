@@ -7,9 +7,6 @@ import com.umc.danggeun.user.model.PostLoginRes;
 import com.umc.danggeun.user.model.User;
 import com.umc.danggeun.utils.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.umc.danggeun.config.BaseResponseStatus.DATABASE_ERROR;

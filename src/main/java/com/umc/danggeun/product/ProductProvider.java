@@ -4,8 +4,6 @@ package com.umc.danggeun.product;
 import com.umc.danggeun.address.AddressProvider;
 import com.umc.danggeun.address.model.GetNearRegionListRes;
 import com.umc.danggeun.config.BaseException;
-import com.umc.danggeun.product.model.PostProductReq;
-import com.umc.danggeun.product.model.PostProductRes;
 import com.umc.danggeun.product.model.ProductSelectedRes;
 import com.umc.danggeun.utils.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.umc.danggeun.config.BaseResponseStatus.DATABASE_ERROR;
 import static com.umc.danggeun.config.BaseResponseStatus.DATABASE_ERROR3;
 
 @Service

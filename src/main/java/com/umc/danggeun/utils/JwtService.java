@@ -2,10 +2,7 @@ package com.umc.danggeun.utils;
 
 import com.umc.danggeun.config.BaseException;
 import com.umc.danggeun.config.secret.Secret;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -35,6 +32,27 @@ public class JwtService {
                 .signWith(SignatureAlgorithm.HS256, Secret.JWT_SECRET_KEY)
                 .compact();
     }
+
+//    /*
+//    social OAuth 하면서 추가 구현
+//     */
+//    public String extractSubject(String accessToken) {
+//        Claims claims = parseClaims(accessToken);
+//        return claims.getSubject();
+//    }
+//
+//    private Claims parseClaims(String accessToken) {
+//        try {
+//            return Jwts.parserBuilder()
+//                    .setSigningKey(Secret.JWT_SECRET_KEY)
+//                    .build()
+//                    .parseClaimsJws(accessToken)
+//                    .getBody();
+//        } catch (ExpiredJwtException e) {
+//            return e.getClaims();
+//        }
+//    }
+
 
     /*
     Header에서 X-ACCESS-TOKEN 으로 JWT 추출

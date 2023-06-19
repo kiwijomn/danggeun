@@ -70,6 +70,14 @@ public class UserDao {
                 getUsersByPhoneParams);
     }
 
+    // 중복 email 있는지 체크
+    public int checkDuplicateEmail(String kakaoEmail){
+        String checkDuplicateEmailQuery = "select exists(select userIdx from User where email = ?)";
+        String checkDuplicateEmailParams = kakaoEmail;
+        return this.jdbcTemplate.queryForObject(checkDuplicateEmailQuery, int.class,
+                checkDuplicateEmailParams);
+    }
+
     // 유저가 존재하는지 체크
     public int checkUserExist(int userIdx) {
         String checkUserExistQuery = "select exists(select userIdx from User where userIdx = ? and isDeleted='N')";
